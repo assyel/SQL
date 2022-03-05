@@ -40,6 +40,7 @@ where monthly_salary < 2000;
 
 
  --3. ПРАВИЛЬНО Вывести все зарплатные позиции, но работник по ним не назначен. (ЗП есть, но не понятно кто её получает.)
+--Примечание от Elen, но не пробовала:  3 запрос первый вариант : достаточно первого left, он дает достаточно информации. 3 запрос второй вариант: обычный join подставляет значения, которые равны в salary и employee_salary, поэтому null исчезает, остаются опознанные работники
 select monthly_salary
 from salary 
  left join employee_salary on salary.id = employee_salary.salary_id 
@@ -48,13 +49,17 @@ from salary
 
 
 
+
  --4. ПРАВИЛЬНО Вывести все зарплатные позиции  меньше 2000 но работник по ним не назначен. (ЗП есть, но не понятно кто её получает.)
+--Примечание от Elen, но не пробовала: 4 запрос первый вариант : имеет такую же ошибку, как 3 (2) второй вариант : второй right join лишний, опять же см 3 (1) и очень не хватает employee_ name,по нему можно вывести зп, не назначенные никому. Третий вариант идеален))
 select monthly_salary
 from salary
 left join employee_salary on salary.id = employee_salary.salary_id
 left join employees on employees.id = employee_salary.employee_id
-where monthly_salary < 2000   
-and employee_salary.employee_id is null;
+where monthly_salary < 2000
+and employee_id is null;
+
+
 
 
  --5. ПРАВИЛЬНО ИХ 34 штук. Найти всех работников кому не начислена ЗП.
@@ -65,11 +70,6 @@ left join salary on employee_salary.salary_id = salary.id
 where monthly_salary is null;
 
 
-select employee_name, salary_id 
-from employees 
-left join employee_salary on employees.id = employee_salary.employee_id
---left join salary on employee_salary.salary_id = salary.id
-where salary_id is null;
 
  --6. ПРАВИЛЬНО. ИХ 40. Вывести всех работников с названиями их должности.
 select employee_name, roles.role_name
@@ -207,7 +207,7 @@ join salary on salary.id = employee_salary.salary_id
 where role_name like '%Junior%';
 
  --22. ПРАВИЛЬНО Вывести сумму зарплат JS разработчиков 
-select sum(monthly_salary)   
+select  sum(monthly_salary)   
 from roles 
 left join roles_employee on roles_employee.role_id = roles.id
 left join employee_salary on roles_employee.employee_id = employee_salary.employee_id 
@@ -291,6 +291,18 @@ left join roles on roles_employee.role_id = roles.id
 left join salary on employee_salary.salary_id = salary.id
 order by monthly_salary asc;
 
+
+select  employee_name, role_name, monthly_salary
+from employees 
+left join roles_employee on roles_employee.employee_id = employees.id
+ join employee_salary on employee_salary.employee_id = employees.id 
+left join roles on roles_employee.role_id = roles.id
+left join salary on employee_salary.salary_id = salary.id
+where monthly_salary > 0 
+order by monthly_salary asc;
+
+
+
 -- Выводит всех имен 31, искл тех, у кого нет ролей. В остальном все сходится
 select  employee_name, role_name, monthly_salary
 from employees 
@@ -299,15 +311,6 @@ from employees
 left join roles on roles_employee.role_id = roles.id
 left join salary on employee_salary.salary_id = salary.id
 order by monthly_salary asc;
-
-
-select  employee_name, role_name, monthly_salary
-from employees 
- join roles_employee on roles_employee.employee_id = employees.id
- join employee_salary on employee_salary.employee_id = employees.id 
-left join roles on roles_employee.role_id = roles.id
-left join salary on employee_salary.salary_id = salary.id
-where monthly_salary > 0;
 
  --30. ПРАВИЛЬНО Вывести имена, должности и ЗП всех специалистов по возрастанию у специалистов у которых ЗП от 1700 до 2300
 -- Выводит имена вместе с теми, у кого нет ролей. В остальном все сходится
@@ -356,10 +359,6 @@ left join employee_salary on employee_salary.employee_id = roles_employee.employ
 left join salary on employee_salary.salary_id = salary.id
 where monthly_salary in (1100, 1500, 2000)
 order by monthly_salary asc;
-
-
-
-
 
 
 
